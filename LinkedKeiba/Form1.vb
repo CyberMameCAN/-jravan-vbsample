@@ -2,6 +2,7 @@
 
     Private lDownloadCount As Long  ' JVOpne 総ダウンロードファイル数
     Private JVOpenFlg As Boolean      ' JVOpen 状態フラグ Open時:True
+    Private objCodeConv As Object    ' コード変換インスタンス
 
     Private Sub mnuConfJV_Click(sender As Object, e As EventArgs) Handles mnuConfJV.Click
         Try
@@ -30,6 +31,11 @@
             Me.Cursor = System.Windows.Forms.Cursors.Default
             Exit Sub
         End If
+
+        ' コード変換インスタンスの生成
+        objCodeConv = New clsCodeConv
+        ' コードファイルを読み込む
+        objCodeConv.FileName = Application.StartupPath & "\CodeTable.csv"
     End Sub
 
     Private Sub btnGetJVData_Click(sender As Object, e As EventArgs) Handles btnGetJVData.Click
@@ -114,13 +120,16 @@
                                     ' データ表示
                                     rtbData.AppendText("年：" & RaceInfo.id.Year &
                                                                    " 月日：" & RaceInfo.id.MonthDay &
-                                                                   " 場：" & RaceInfo.id.JyoCD &
+                                                                   " 場：" & objCodeConv.GetCodeName("2001", RaceInfo.id.JyoCD, "3") &
                                                                    " 回次：" & RaceInfo.id.Kaiji &
                                                                    " 日次：" & RaceInfo.id.Nichiji &
                                                                    " R：" & RaceInfo.id.RaceNum &
                                                                    " レース名：" & RaceInfo.RaceInfo.Ryakusyo10 &
-                                                                   "天候コード：" & RaceInfo.TenkoBaba.TenkoCD &
-                                                                   vbCrLf)
+                                                                   "天候：" & objCodeConv.GetCodeName("2011", RaceInfo.TenkoBaba.TenkoCD, "1") &
+                                    vbCrLf)
+                                Else
+                                    ' レース詳細以外は読み飛ばす
+                                    Call AxJVLink1.JVSkip()
                                 End If
                         End Select
                     Loop While (1)
